@@ -11,27 +11,16 @@ use {
     crate::{
         state::LottoSeed,
     },
-    borsh::{BorshDeserialize, BorshSerialize},
     solana_program::{
-        account_info::{next_account_info, AccountInfo},
-        borsh::try_from_slice_unchecked,
-        clock::Clock,
+        account_info::AccountInfo,
         entrypoint::ProgramResult,
         instruction::Instruction,
-        msg,
         program::{invoke, invoke_signed}, 
-        program_error::ProgramError,
         pubkey::Pubkey,
         rent::Rent, 
-        sysvar::Sysvar, 
         system_instruction, 
-        system_program,
     },
-    spl_associated_token_account::{
-        instruction::{
-            create_associated_token_account_idempotent
-        }
-    },
+    spl_associated_token_account::instruction::create_associated_token_account_idempotent,
     std::convert::AsRef,
 };
 
@@ -44,18 +33,6 @@ pub struct Create;
 
 impl Create {
     
-    // pub fn seeds<'a: 'b, 'c>(
-    //     config_info: &'a AccountInfo<'a>,
-    //     seed: &'b LottoSeed,
-    //     bump: u8,
-    // ) -> [&'c [u8]; 3] {
-    //     return [
-    //         config_info.key.as_ref(),
-    //         seed.as_ref().as_ref(),
-    //         &[bump],
-    //     ]
-    // }
-
     pub fn seeds<'a: 'b, 'b>(
         config_info: &'b AccountInfo<'a>,
         seed: &'b [u8],

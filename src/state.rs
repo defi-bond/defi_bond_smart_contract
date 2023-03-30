@@ -141,6 +141,9 @@ pub struct LottoConfig {
     /// The minimum number of epochs required between draws.
     pub epochs_per_draw: u8,
 
+    /// The maximum number of consecutive rollovers.
+    pub max_rollover: u8,
+
     /// The maximum odds of a single account expressed by the percentage (0-100)
     /// `(odds_threshold_numerator/odds_threshold_denominator)*100`.
     pub odds_threshold_numerator: u32,
@@ -176,6 +179,7 @@ impl LottoConfig {
     pub fn new(
         is_active: bool,
         epochs_per_draw: u8,
+        max_rollover: u8,
         odds_threshold_numerator: u32,
         odds_threshold_denominator: u32,
         draw_authority: Pubkey,
@@ -185,6 +189,7 @@ impl LottoConfig {
             account_type: LottoAccountType::Config,
             is_active,
             epochs_per_draw,
+            max_rollover,
             odds_threshold_numerator,
             odds_threshold_denominator,
             draw_authority,
@@ -213,6 +218,9 @@ pub struct LottoState {
 
     /// The latest draw result id.
     pub draw_id: u64,
+
+    /// The number of consecutive rollovers.
+    pub rollover: u8,
 }
 
 impl LottoAccount for LottoState {
@@ -248,12 +256,14 @@ impl LottoState {
         authority: Pubkey,
         bump: u8,
         draw_id: u64,
+        rollover: u8,
     ) -> Self {
         Self { 
             account_type: LottoAccountType::State,
             authority,
             bump,
             draw_id,
+            rollover,
         }
     }
 }
@@ -359,6 +369,9 @@ pub struct LottoDraw {
     /// The winning account.
     pub receiver: Pubkey,
 
+    /// The rollover count at the time of this draw.
+    pub rollover: u8,
+
     /// The network/bank slot at which the draw took place.
     pub slot: u64,
 
@@ -400,6 +413,7 @@ impl LottoDraw {
         amount: u64,
         receiver_seed: u64,
         receiver: Pubkey,
+        rollover: u8,
         slot: u64,
         epoch_start_timestamp: i64,
         epoch: u64,
@@ -412,6 +426,7 @@ impl LottoDraw {
             amount,
             receiver_seed,
             receiver,
+            rollover,
             slot,
             epoch_start_timestamp,
             epoch,

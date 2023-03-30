@@ -1,3 +1,11 @@
+# Environment Stup
+
+Set Solana cluster and wallet (dream drop manager keypair).
+```cmd
+$ solana config set -u devnet
+$ solana config set -k <FULL_PATH_TO_KEYPAIR.JSON>
+```
+
 # Build Program
 
 Creates a keypair (program account) and shared object (binary) file in the `target/deploy/` folder.

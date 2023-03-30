@@ -131,7 +131,17 @@ impl Processor {
                     draw_seed,
                 )
             },
+            LottoInstruction::Test => {
+                Self::process_test(program_id, accounts)
+            }
         }
+    }
+
+    fn process_test(
+        program_id: &Pubkey,
+        accounts: &[AccountInfo],
+    ) -> ProgramResult {
+        Ok(())
     }
 
     /// Create accounts.
@@ -436,6 +446,7 @@ impl Processor {
         LottoConfig::new(
             true,
             0, 
+            3,
             10, 
             100, 
             *draw_authority_info.key, 
@@ -461,6 +472,7 @@ impl Processor {
         LottoState::new(
             authority,
             state_bump,
+            0,
             0,
         ).serialize(
             &mut &mut state_info.data.borrow_mut()[..],
@@ -545,7 +557,7 @@ impl Processor {
             config_info, 
             jackpot_info, 
             authority, 
-            40, 
+            80, 
             100,
             LottoSeed::Jackpot, 
             jackpot_bump, 
@@ -793,12 +805,16 @@ impl Processor {
             return Err(ProgramError::InvalidSeeds);
         }
 
+        let is_rollover = receiver_info.key.eq(jackpot_info.key);
+        let rollover = if is_rollover { state.rollover + 1 } else { 0 };
+
         LottoDraw::new(
             draw_authority_info.key.clone(),
             id,
             amount,
             receiver_seed,
             receiver_info.key.clone(),
+            rollover,
             epoch.slot,
             epoch.epoch_start_timestamp,
             epoch.epoch,
@@ -808,9 +824,10 @@ impl Processor {
         )?;
 
         state.draw_id = id;
+        state.rollover = rollover;
         state.serialize(&mut &mut state_info.data.borrow_mut()[..])?;
 
-        if receiver_info.key.ne(jackpot_info.key) {
+        if !is_rollover {
             // Jackpot -> Winner!
             Create::token_transfer_checked(
                 draw_authority_info,

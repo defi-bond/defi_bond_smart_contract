@@ -2,7 +2,7 @@
 
 
 // The deployed program id.
-solana_program::declare_id!("5uhudfA5RKkoAt6Bku1VUeWuenPiaVAgoVZj4pBUssuS");
+solana_program::declare_id!("98iqnEfLWpWK69Yn7YAPnWvkCSZAUgkXeS4tciGjccHQ");
 
 #[cfg(not(feature = "no-entrypoint"))]
 pub mod check;

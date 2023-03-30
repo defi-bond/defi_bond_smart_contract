@@ -5,7 +5,6 @@
 // -------------------------------------------------------------------------------------------------
 
 use {
-    crate::state::*,
     borsh::{BorshDeserialize, BorshSerialize},
     solana_program::pubkey::Pubkey,
 };
@@ -141,4 +140,6 @@ pub enum LottoInstruction {
         receiver_seed: u64,
         draw_seed: u64,
     },
+
+    Test,
 }
