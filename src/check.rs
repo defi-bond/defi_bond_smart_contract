@@ -6,8 +6,8 @@
 
 use {
     crate::state::{
-        LottoSeed, 
-        LottoAccount,
+        BondSeed, 
+        BondAccount,
     },
     solana_program::{
         account_info::AccountInfo, 
@@ -141,7 +141,7 @@ impl Check {
         program_id: &Pubkey,
         config_info: &AccountInfo,
         pda_info: &AccountInfo,
-        seed: LottoSeed,
+        seed: BondSeed,
         bump: u8,
     ) -> Result<(), ProgramError> {
         let pda = Pubkey::create_program_address(
@@ -177,7 +177,7 @@ impl Check {
 
     /// Check that `account` has been initialized.
     pub fn initialized(
-        account: &impl LottoAccount,
+        account: &impl BondAccount,
         account_info: &AccountInfo,
     ) -> Result<(), ProgramError> {
         if !account.is_initialized() {
@@ -190,7 +190,7 @@ impl Check {
 
     /// Check that `account` is uninitialized.
     pub fn uninitialized(
-        account: &impl LottoAccount,
+        account: &impl BondAccount,
         account_info: &AccountInfo,
     ) -> Result<(), ProgramError> {
         if account.is_initialized() {
@@ -203,7 +203,7 @@ impl Check {
 
     /// Check that `account` has been initialized to the correct type.
     pub fn valid(
-        account: &impl LottoAccount,
+        account: &impl BondAccount,
         account_info: &AccountInfo,
     ) -> Result<(), ProgramError> {
         if !account.is_valid() {

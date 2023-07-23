@@ -14,9 +14,9 @@ use {
 /// Account Type
 /// -------------------------------------------------------------------------------------------------
 
-/// The types of program derived addresses managed by the Lotto program.
+/// The types of program derived addresses managed by the Bond program.
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub enum LottoAccountType {
+pub enum BondAccountType {
 
     /// The type given to a new account that has not been initialized.
     Uninitialized,
@@ -40,19 +40,19 @@ pub enum LottoAccountType {
     ExclusionList,
 }
 
-impl Default for LottoAccountType {
+impl Default for BondAccountType {
     fn default() -> Self {
-        LottoAccountType::Uninitialized
+        BondAccountType::Uninitialized
     }
 }
 
 
-/// Lotto Seed
+/// Bond Seed
 /// -------------------------------------------------------------------------------------------------
 
-/// The seeds of program derived addresses managed by the Lotto program.
+/// The seeds of program derived addresses managed by the Bond program.
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema, AsRefStr)]
-pub enum LottoSeed {
+pub enum BondSeed {
 
     /// The current state.
     #[strum(serialize = "state")]
@@ -88,52 +88,52 @@ pub enum LottoSeed {
 }
 
 
-/// Lotto Account
+/// Bond Account
 /// ------------------------------------------------------------------------------------------------
 
-/// A Lotto account (implemented by all account).
-pub trait LottoAccount {
+/// A Bond account (implemented by all account).
+pub trait BondAccount {
 
     /// True if the account has been initialized.
     fn is_initialized(&self) -> bool;
 
-    /// True if the account has been initialized with the expected [LottoAccountType].
+    /// True if the account has been initialized with the expected [BondAccountType].
     fn is_valid(&self) -> bool;
 }
 
 
-/// Lotto Program Account
+/// Bond Program Account
 /// ------------------------------------------------------------------------------------------------
 
-/// A Lotto account owned by the program.
-pub trait LottoProgramAccount: LottoAccount {
+/// A Bond account owned by the program.
+pub trait BondProgramAccount: BondAccount {
 
     /// The account authorized to modify this account.
     fn authority(&self) -> Pubkey;
 }
 
 
-/// Lotto Program Derived Account
+/// Bond Program Derived Account
 /// ------------------------------------------------------------------------------------------------
 
-/// A Lotto account owned by the program with a derived address.
-pub trait LottoProgramDerivedAccount: LottoProgramAccount {
+/// A Bond account owned by the program with a derived address.
+pub trait BondProgramDerivedAccount: BondProgramAccount {
 
     /// The derived account's bump seed.
     fn bump(&self) -> u8;
 }
 
 
-/// Lotto Config
+/// Bond Config
 /// ------------------------------------------------------------------------------------------------
 
 /// The configurations and settings.
 #[repr(C)]
 #[derive(Clone, Debug, Default, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub struct LottoConfig {
+pub struct BondConfig {
 
-    /// [LottoAccountType::Config].
-    pub account_type: LottoAccountType,
+    /// [BondAccountType::Config].
+    pub account_type: BondAccountType,
     
     /// Whether or not the game is active.
     pub is_active: bool,
@@ -159,23 +159,23 @@ pub struct LottoConfig {
     pub token_mint: Pubkey,
 }
 
-impl LottoAccount for LottoConfig {
+impl BondAccount for BondConfig {
 
-    /// True if `account_type` is not [LottoAccountType::Uninitialized].
+    /// True if `account_type` is not [BondAccountType::Uninitialized].
     fn is_initialized(&self) -> bool { 
-        self.account_type != LottoAccountType::Uninitialized 
+        self.account_type != BondAccountType::Uninitialized 
     }
 
-    /// True if `account_type` is [LottoAccountType::Config].
+    /// True if `account_type` is [BondAccountType::Config].
     fn is_valid(&self) -> bool { 
-        self.account_type == LottoAccountType::Config 
+        self.account_type == BondAccountType::Config 
     }
 }
 
-impl LottoConfig {
+impl BondConfig {
 
-    /// Creates a new instance of [LottoConfig] with an `account_type` of 
-    /// [LottoAccountType::Config].
+    /// Creates a new instance of [BondConfig] with an `account_type` of 
+    /// [BondAccountType::Config].
     pub fn new(
         is_active: bool,
         epochs_per_draw: u8,
@@ -186,7 +186,7 @@ impl LottoConfig {
         token_mint: Pubkey,
     ) -> Self {
         Self { 
-            account_type: LottoAccountType::Config,
+            account_type: BondAccountType::Config,
             is_active,
             epochs_per_draw,
             max_rollover,
@@ -199,16 +199,16 @@ impl LottoConfig {
 }
 
 
-/// Lotto State
+/// Bond State
 /// ------------------------------------------------------------------------------------------------
 
 /// The current state of the game.
 #[repr(C)]
 #[derive(Clone, Debug, Default, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub struct LottoState {
+pub struct BondState {
 
-    /// [LottoAccountType::State].
-    pub account_type: LottoAccountType,
+    /// [BondAccountType::State].
+    pub account_type: BondAccountType,
     
     /// The account authorized to modify this account.
     pub authority: Pubkey,
@@ -223,35 +223,35 @@ pub struct LottoState {
     pub rollover: u8,
 }
 
-impl LottoAccount for LottoState {
+impl BondAccount for BondState {
 
-    /// True if `account_type` is not [LottoAccountType::Uninitialized].
+    /// True if `account_type` is not [BondAccountType::Uninitialized].
     fn is_initialized(&self) -> bool { 
-        self.account_type != LottoAccountType::Uninitialized 
+        self.account_type != BondAccountType::Uninitialized 
     }
 
-    /// True if `account_type` is [LottoAccountType::State].
+    /// True if `account_type` is [BondAccountType::State].
     fn is_valid(&self) -> bool { 
-        self.account_type == LottoAccountType::State 
+        self.account_type == BondAccountType::State 
     }
 }
 
-impl LottoProgramAccount for LottoState {
+impl BondProgramAccount for BondState {
     fn authority(&self) -> Pubkey {
         self.authority
     }
 }
 
-impl LottoProgramDerivedAccount for LottoState {
+impl BondProgramDerivedAccount for BondState {
     fn bump(&self) -> u8 {
         self.bump
     }
 }
 
-impl LottoState {
+impl BondState {
 
-    /// Creates a new instance of [LottoState] with an `account_type` of 
-    /// [LottoAccountType::State].
+    /// Creates a new instance of [BondState] with an `account_type` of 
+    /// [BondAccountType::State].
     pub fn new(
         authority: Pubkey,
         bump: u8,
@@ -259,7 +259,7 @@ impl LottoState {
         rollover: u8,
     ) -> Self {
         Self { 
-            account_type: LottoAccountType::State,
+            account_type: BondAccountType::State,
             authority,
             bump,
             draw_id,
@@ -269,16 +269,16 @@ impl LottoState {
 }
 
 
-/// Lotto Share
+/// Bond Share
 /// ------------------------------------------------------------------------------------------------
 
-/// An account that receives a share of the stake pool's rewards ([LottoFee]).
+/// An account that receives a share of the stake pool's rewards ([BondFee]).
 #[repr(C)]
 #[derive(Clone, Debug, Default, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub struct LottoShare {
+pub struct BondShare {
 
-    /// [LottoAccountType::Share].
-    pub account_type: LottoAccountType,
+    /// [BondAccountType::Share].
+    pub account_type: BondAccountType,
 
     /// The account authorized to modify this account.
     pub authority: Pubkey,
@@ -293,34 +293,34 @@ pub struct LottoShare {
     pub denominator: u32,
 }
 
-impl LottoAccount for LottoShare {
+impl BondAccount for BondShare {
 
-    /// True if `account_type` is not [LottoAccountType::Uninitialized].
+    /// True if `account_type` is not [BondAccountType::Uninitialized].
     fn is_initialized(&self) -> bool {
-        self.account_type != LottoAccountType::Uninitialized
+        self.account_type != BondAccountType::Uninitialized
     }
 
-    /// True if `account_type` is [LottoAccountType::Share].
+    /// True if `account_type` is [BondAccountType::Share].
     fn is_valid(&self) -> bool {
-        self.account_type == LottoAccountType::Share
+        self.account_type == BondAccountType::Share
     }
 }
 
-impl LottoProgramAccount for LottoShare {
+impl BondProgramAccount for BondShare {
     fn authority(&self) -> Pubkey {
         self.authority
     }
 }
 
-impl LottoProgramDerivedAccount for LottoShare {
+impl BondProgramDerivedAccount for BondShare {
     fn bump(&self) -> u8 {
         self.bump
     }
 }
 
-impl LottoShare {
+impl BondShare {
 
-    /// Creates a new instance of [LottoShare] with an `account_type` of [LottoAccountType::Share].
+    /// Creates a new instance of [BondShare] with an `account_type` of [BondAccountType::Share].
     pub fn new(
         authority: Pubkey, 
         bump: u8, 
@@ -328,7 +328,7 @@ impl LottoShare {
         denominator: u32,
     ) -> Self {
         Self { 
-            account_type: LottoAccountType::Share, 
+            account_type: BondAccountType::Share, 
             authority, 
             bump,
             numerator,
@@ -343,16 +343,16 @@ impl LottoShare {
 }
 
 
-/// Lotto Draw
+/// Bond Draw
 /// ------------------------------------------------------------------------------------------------
 
 /// A draw result.
 #[repr(C)]
 #[derive(Clone, Debug, Default, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub struct LottoDraw {
+pub struct BondDraw {
 
-    /// [LottoAccountType::Draw].
-    pub account_type: LottoAccountType,
+    /// [BondAccountType::Draw].
+    pub account_type: BondAccountType,
 
     /// The account authorized to modify this account.
     pub authority: Pubkey,
@@ -385,28 +385,28 @@ pub struct LottoDraw {
     pub unix_timestamp: i64,
 }
 
-impl LottoAccount for LottoDraw {
+impl BondAccount for BondDraw {
     
-    /// True if `account_type` is not [LottoAccountType::Uninitialized].
+    /// True if `account_type` is not [BondAccountType::Uninitialized].
     fn is_initialized(&self) -> bool {
-        self.account_type != LottoAccountType::Uninitialized
+        self.account_type != BondAccountType::Uninitialized
     }
 
-    /// True if `account_type` is [LottoAccountType::Draw].
+    /// True if `account_type` is [BondAccountType::Draw].
     fn is_valid(&self) -> bool {
-        self.account_type == LottoAccountType::Draw
+        self.account_type == BondAccountType::Draw
     }
 }
 
-impl LottoProgramAccount for LottoDraw {
+impl BondProgramAccount for BondDraw {
     fn authority(&self) -> Pubkey {
         self.authority
     }
 }
 
-impl LottoDraw {
+impl BondDraw {
 
-    /// Creates a new instance of [LottoDraw] with an `account_type` of [LottoAccountType::Draw].
+    /// Creates a new instance of [BondDraw] with an `account_type` of [BondAccountType::Draw].
     pub fn new(
         authority: Pubkey,
         id: u64,
@@ -420,7 +420,7 @@ impl LottoDraw {
         unix_timestamp: i64,
     ) -> Self {
         Self { 
-            account_type: LottoAccountType::Draw, 
+            account_type: BondAccountType::Draw, 
             authority,
             id,
             amount,
@@ -436,16 +436,16 @@ impl LottoDraw {
 }
 
 
-/// Lotto Fee
+/// Bond Fee
 /// ------------------------------------------------------------------------------------------------
 
 /// The account that collects the Stake Pool's epoch fee.
 #[repr(C)]
 #[derive(Clone, Debug, Default, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub struct LottoFee {
+pub struct BondFee {
 
-    /// [LottoAccountType::Fee].
-    pub account_type: LottoAccountType,
+    /// [BondAccountType::Fee].
+    pub account_type: BondAccountType,
 
     /// The account authorized to modify this account.
     pub authority: Pubkey,
@@ -454,40 +454,40 @@ pub struct LottoFee {
     pub bump: u8,
 }
 
-impl LottoAccount for LottoFee {
+impl BondAccount for BondFee {
     
-    /// True if `account_type` is not [LottoAccountType::Uninitialized].
+    /// True if `account_type` is not [BondAccountType::Uninitialized].
     fn is_initialized(&self) -> bool {
-        self.account_type != LottoAccountType::Uninitialized
+        self.account_type != BondAccountType::Uninitialized
     }
 
-    /// True if `account_type` is [LottoAccountType::Fee].
+    /// True if `account_type` is [BondAccountType::Fee].
     fn is_valid(&self) -> bool {
-        self.account_type == LottoAccountType::Fee
+        self.account_type == BondAccountType::Fee
     }
 }
 
-impl LottoProgramAccount for LottoFee {
+impl BondProgramAccount for BondFee {
     fn authority(&self) -> Pubkey {
         self.authority
     }
 }
 
-impl LottoProgramDerivedAccount for LottoFee {
+impl BondProgramDerivedAccount for BondFee {
     fn bump(&self) -> u8 {
         self.bump
     }
 }
 
-impl LottoFee {
+impl BondFee {
     
-    /// Creates a new instance of [LottoFee] with an `account_type` of [LottoAccountType::Fee].
+    /// Creates a new instance of [BondFee] with an `account_type` of [BondAccountType::Fee].
     pub fn new(
         authority: Pubkey,
         bump: u8, 
     ) -> Self {
         Self { 
-            account_type: LottoAccountType::Fee,
+            account_type: BondAccountType::Fee,
             authority, 
             bump,
         }
@@ -498,13 +498,13 @@ impl LottoFee {
 /// Exclusion List
 /// ------------------------------------------------------------------------------------------------
 
-/// A list of accounts that are ineligible to win the Lotto draw.
+/// A list of accounts that are ineligible to win the Bond draw.
 #[repr(C)]
 #[derive(Clone, Debug, Default, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub struct LottoExclusionList {
+pub struct BondExclusionList {
 
-    /// [LottoAccountType::ExclusionList].
-    pub account_type: LottoAccountType,
+    /// [BondAccountType::ExclusionList].
+    pub account_type: BondAccountType,
 
     /// The account authorized to modify this account.
     pub authority: Pubkey,
@@ -519,35 +519,35 @@ pub struct LottoExclusionList {
     pub accounts: Vec<Pubkey>,
 }
 
-impl LottoAccount for LottoExclusionList {
+impl BondAccount for BondExclusionList {
     
-    /// True if `account_type` is not [LottoAccountType::Uninitialized].
+    /// True if `account_type` is not [BondAccountType::Uninitialized].
     fn is_initialized(&self) -> bool {
-        self.account_type != LottoAccountType::Uninitialized
+        self.account_type != BondAccountType::Uninitialized
     }
 
-    /// True if `account_type` is [LottoAccountType::ExclusionList].
+    /// True if `account_type` is [BondAccountType::ExclusionList].
     fn is_valid(&self) -> bool {
-        self.account_type == LottoAccountType::ExclusionList
+        self.account_type == BondAccountType::ExclusionList
     }
 }
 
-impl LottoProgramAccount for LottoExclusionList {
+impl BondProgramAccount for BondExclusionList {
     fn authority(&self) -> Pubkey {
         self.authority
     }
 }
 
-impl LottoProgramDerivedAccount for LottoExclusionList {
+impl BondProgramDerivedAccount for BondExclusionList {
     fn bump(&self) -> u8 {
         self.bump
     }
 }
 
-impl LottoExclusionList {
+impl BondExclusionList {
 
-    /// Creates a new instance of [LottoExclusionList] with an `account_type` of 
-    /// [LottoAccountType::ExclusionList].
+    /// Creates a new instance of [BondExclusionList] with an `account_type` of 
+    /// [BondAccountType::ExclusionList].
     pub fn new(
         authority: Pubkey,
         bump: u8, 
@@ -555,7 +555,7 @@ impl LottoExclusionList {
         accounts: Vec<Pubkey>,
     ) -> Self {
         Self { 
-            account_type: LottoAccountType::ExclusionList,
+            account_type: BondAccountType::ExclusionList,
             authority, 
             bump,
             capacity,

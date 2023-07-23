@@ -18,7 +18,7 @@ $ cargo build-sbf
 
 Deploys the program's binary to the cluster and returns the `program id`.
 ```cmd
-$ solana program deploy target/deploy/stake_pool_lotto.so
+$ solana program deploy target/deploy/defi_bond.so
 ```
 
 # Debugging

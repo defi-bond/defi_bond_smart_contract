@@ -14,18 +14,18 @@ use {
 // Error
 // -------------------------------------------------------------------------------------------------
 
-/// Known errors returned by the Lotto program.
+/// Known errors returned by the Bond program.
 #[derive(Clone, Debug, Eq, Error, FromPrimitive, PartialEq)]
-pub enum LottoError {}
+pub enum BondError {}
 
-impl From<LottoError> for ProgramError {
-    fn from(e: LottoError) -> Self {
+impl From<BondError> for ProgramError {
+    fn from(e: BondError) -> Self {
         ProgramError::Custom(e as u32)
     }
 }
 
-impl<T> DecodeError<T> for LottoError {
+impl<T> DecodeError<T> for BondError {
     fn type_of() -> &'static str {
-        "Stake Pool Lotto Error"
+        "Bond Error"
     }
 }

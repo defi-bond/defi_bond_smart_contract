@@ -9,7 +9,7 @@ use crate::check::Check;
 /// ------------------------------------------------------------------------------------------------
 use {
     crate::{
-        state::LottoSeed,
+        state::BondSeed,
     },
     solana_program::{
         account_info::AccountInfo,
@@ -89,7 +89,7 @@ impl Create {
     pub fn pda(
         program_id: &Pubkey,
         config_info: &AccountInfo,
-        seed: LottoSeed,
+        seed: BondSeed,
         bump: u8,
     ) -> Result<Pubkey, PubkeyError> {
         let bump = [bump];
@@ -109,7 +109,7 @@ impl Create {
         config_info: &'b AccountInfo<'a>,
         payer_info: &'b AccountInfo<'a>,
         pda_info: &'b AccountInfo<'a>,
-        pda_seed: LottoSeed,
+        pda_seed: BondSeed,
         pda_bump: u8,
         system_program_info: &'b AccountInfo<'a>,
         rent: &'b Rent,
@@ -181,7 +181,7 @@ impl Create {
         config_info: &'b AccountInfo<'a>,
         payer_info: &'b AccountInfo<'a>,
         pda_info: &'b AccountInfo<'a>,
-        pda_seed: LottoSeed,
+        pda_seed: BondSeed,
         pda_bump: u8,
         ata_info: &'b AccountInfo<'a>,
         token_mint_info: &'b AccountInfo<'a>,
@@ -221,7 +221,7 @@ impl Create {
         source_info: &'a AccountInfo<'b>,
         destination_info: &'a AccountInfo<'b>,
         authority_info: &'a AccountInfo<'b>,
-        seed: LottoSeed,
+        seed: BondSeed,
         bump: u8,
         amount: u64,
     ) -> ProgramResult {

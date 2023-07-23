@@ -8,7 +8,7 @@ use solana_program::program_pack::Pack;
 use spl_token::state::Account;
 use {
     crate::{
-        instruction::LottoInstruction,
+        instruction::BondInstruction,
         state::*,
         check::Check,
         create::Create,
@@ -42,10 +42,10 @@ impl Processor {
         instruction_data: &[u8],
     ) -> ProgramResult {
         msg!("Process Instruction...");
-        let instruction = LottoInstruction::try_from_slice(instruction_data)?;
+        let instruction = BondInstruction::try_from_slice(instruction_data)?;
         msg!("Process Instruction Data...");
         match instruction {
-            LottoInstruction::Create { 
+            BondInstruction::Create { 
                 config_space, 
                 state_bump, 
                 state_space, 
@@ -83,7 +83,7 @@ impl Processor {
                     stake_space, 
                 )
             },
-            LottoInstruction::Initialize { 
+            BondInstruction::Initialize { 
                 state_bump, 
                 fee_bump, 
                 exclusion_list_bump, 
@@ -109,7 +109,7 @@ impl Processor {
                     stake_bump,
                 )
             },
-            LottoInstruction::SplitShares {
+            BondInstruction::SplitShares {
                 amount,
             } => {
                 msg!("Instruction: Split Shares");
@@ -119,7 +119,7 @@ impl Processor {
                     amount,
                 )
             },
-            LottoInstruction::Draw {
+            BondInstruction::Draw {
                 receiver_seed,
                 draw_seed,
             } => {
@@ -131,7 +131,7 @@ impl Processor {
                     draw_seed,
                 )
             },
-            LottoInstruction::Test => {
+            BondInstruction::Test => {
                 Self::process_test(program_id, accounts)
             }
         }
@@ -225,7 +225,7 @@ impl Processor {
             config_info, 
             payer_info, 
             &state_info,
-            LottoSeed::State,
+            BondSeed::State,
             state_bump,
             system_program_info,
             &rent,
@@ -238,7 +238,7 @@ impl Processor {
             config_info, 
             payer_info, 
             fee_info, 
-            LottoSeed::Fee, 
+            BondSeed::Fee, 
             fee_bump, 
             fee_ata_info, 
             token_mint_info, 
@@ -255,7 +255,7 @@ impl Processor {
             config_info, 
             payer_info, 
             exclusion_list_info, 
-            LottoSeed::ExclusionList, 
+            BondSeed::ExclusionList, 
             exclusion_list_bump, 
             system_program_info,
             &rent,
@@ -268,7 +268,7 @@ impl Processor {
             config_info, 
             payer_info, 
             equity_info, 
-            LottoSeed::Equity, 
+            BondSeed::Equity, 
             equity_bump, 
             equity_ata_info, 
             token_mint_info, 
@@ -285,7 +285,7 @@ impl Processor {
             config_info, 
             payer_info, 
             treasury_info, 
-            LottoSeed::Treasury, 
+            BondSeed::Treasury, 
             treasury_bump, 
             treasury_ata_info, 
             token_mint_info, 
@@ -302,7 +302,7 @@ impl Processor {
             config_info, 
             payer_info, 
             jackpot_info, 
-            LottoSeed::Jackpot, 
+            BondSeed::Jackpot, 
             jackpot_bump, 
             jackpot_ata_info, 
             token_mint_info, 
@@ -319,7 +319,7 @@ impl Processor {
             config_info, 
             payer_info, 
             stake_info, 
-            LottoSeed::Stake, 
+            BondSeed::Stake, 
             stake_bump, 
             stake_ata_info, 
             token_mint_info, 
@@ -333,7 +333,7 @@ impl Processor {
 
     fn check_initialize_account(
         program_id: &Pubkey,
-        account: &impl LottoAccount,
+        account: &impl BondAccount,
         account_info: &AccountInfo,
         rent: &Rent,
     ) -> Result<(), ProgramError> {
@@ -347,9 +347,9 @@ impl Processor {
     fn check_initialize_pda_account(
         program_id: &Pubkey,
         config_info: &AccountInfo,
-        pda: &impl LottoAccount,
+        pda: &impl BondAccount,
         pda_info: &AccountInfo,
-        seed: LottoSeed,
+        seed: BondSeed,
         bump: u8,
         rent: &Rent,
     ) -> Result<(), ProgramError> {
@@ -364,11 +364,11 @@ impl Processor {
         authority: Pubkey,
         numerator: u32,
         denominator: u32,
-        seed: LottoSeed,
+        seed: BondSeed,
         bump: u8,
         rent: &Rent,
     ) -> ProgramResult {
-        let account = try_from_slice_unchecked::<LottoShare>(
+        let account = try_from_slice_unchecked::<BondShare>(
             &account_info.data.borrow(),
         )?;
         Self::check_initialize_pda_account(
@@ -380,7 +380,7 @@ impl Processor {
             bump, 
             &rent,
         )?;
-        LottoShare::new(
+        BondShare::new(
             authority, 
             bump, 
             numerator,
@@ -434,7 +434,7 @@ impl Processor {
 
         // Config Account.
         msg!("Initialize Config");
-        let config = try_from_slice_unchecked::<LottoConfig>(
+        let config = try_from_slice_unchecked::<BondConfig>(
             &config_info.data.borrow(),
         )?;
         Self::check_initialize_account(
@@ -443,7 +443,7 @@ impl Processor {
             config_info,
             &rent,
         )?;
-        LottoConfig::new(
+        BondConfig::new(
             true,
             0, 
             3,
@@ -457,7 +457,7 @@ impl Processor {
 
         // State PDA Account.
         msg!("Initialize State");
-        let state = try_from_slice_unchecked::<LottoState>(
+        let state = try_from_slice_unchecked::<BondState>(
             &state_info.data.borrow(),
         )?;
         Self::check_initialize_pda_account(
@@ -465,11 +465,11 @@ impl Processor {
             config_info, 
             &state,
             state_info, 
-            LottoSeed::State, 
+            BondSeed::State, 
             state_bump, 
             &rent,
         )?;
-        LottoState::new(
+        BondState::new(
             authority,
             state_bump,
             0,
@@ -480,7 +480,7 @@ impl Processor {
 
         // Fee PDA Account.
         msg!("Initialize Fee");
-        let fee = try_from_slice_unchecked::<LottoFee>(
+        let fee = try_from_slice_unchecked::<BondFee>(
             &fee_info.data.borrow(),
         )?;
         Self::check_initialize_pda_account(
@@ -488,11 +488,11 @@ impl Processor {
             config_info, 
             &fee,
             fee_info, 
-            LottoSeed::Fee, 
+            BondSeed::Fee, 
             fee_bump, 
             &rent,
         )?;
-        LottoFee::new(
+        BondFee::new(
             authority,
             fee_bump,
         ).serialize(
@@ -501,7 +501,7 @@ impl Processor {
 
         // Exclusion List PDA Account.
         msg!("Initialize Exclusion List");
-        let exclusion_list = try_from_slice_unchecked::<LottoExclusionList>(
+        let exclusion_list = try_from_slice_unchecked::<BondExclusionList>(
             &exclusion_list_info.data.borrow(),
         )?;
         Self::check_initialize_pda_account(
@@ -509,11 +509,11 @@ impl Processor {
             config_info, 
             &exclusion_list,
             exclusion_list_info, 
-            LottoSeed::ExclusionList, 
+            BondSeed::ExclusionList, 
             exclusion_list_bump, 
             &rent,
         )?;
-        LottoExclusionList::new(
+        BondExclusionList::new(
             authority,
             exclusion_list_bump,
             exclusion_list_capacity,
@@ -531,7 +531,7 @@ impl Processor {
             authority, 
             10,
             100, 
-            LottoSeed::Equity, 
+            BondSeed::Equity, 
             equity_bump, 
             &rent,
         )?;
@@ -545,7 +545,7 @@ impl Processor {
             authority, 
             0, 
             0,
-            LottoSeed::Treasury, 
+            BondSeed::Treasury, 
             treasury_bump, 
             &rent,
         )?;
@@ -559,7 +559,7 @@ impl Processor {
             authority, 
             80, 
             100,
-            LottoSeed::Jackpot, 
+            BondSeed::Jackpot, 
             jackpot_bump, 
             &rent,
         )?;
@@ -573,12 +573,12 @@ impl Processor {
             authority, 
             10, 
             100, 
-            LottoSeed::Stake, 
+            BondSeed::Stake, 
             stake_bump, 
             &rent,
         )?;
 
-        msg!("Initialize Lotto Complete!");
+        msg!("Initialize Bond Complete!");
         Ok(())
     }
 
@@ -586,7 +586,7 @@ impl Processor {
         program_id: &Pubkey,
         config_info: &AccountInfo,
         draw_authority_info: &AccountInfo,
-        config: &LottoConfig,
+        config: &BondConfig,
     ) -> Result<(), ProgramError> {
         Check::owner(config_info, program_id)?;
         Check::signer(draw_authority_info)?;
@@ -598,7 +598,7 @@ impl Processor {
         program_id: &Pubkey,
         config_info: &AccountInfo,
         share_info: &AccountInfo,
-        share: &impl LottoProgramAccount,
+        share: &impl BondProgramAccount,
         share_ata_info: &AccountInfo,
         share_ata: &Account,
     ) -> Result<(), ProgramError> {
@@ -617,11 +617,11 @@ impl Processor {
         let account_info_iter = &mut accounts.iter();
         let draw_authority_info = next_account_info(account_info_iter)?;
         let config_info = next_account_info(account_info_iter)?;
-        let config = try_from_slice_unchecked::<LottoConfig>(&config_info.data.borrow())?;
+        let config = try_from_slice_unchecked::<BondConfig>(&config_info.data.borrow())?;
         Self::check_draw_account(program_id, config_info, draw_authority_info, &config)?;
 
         let fee_info = next_account_info(account_info_iter)?;
-        let fee = try_from_slice_unchecked::<LottoFee>(&fee_info.data.borrow())?;
+        let fee = try_from_slice_unchecked::<BondFee>(&fee_info.data.borrow())?;
         let fee_ata_info = next_account_info(account_info_iter)?;
         let fee_ata = Account::unpack_from_slice(&fee_ata_info.data.borrow())?;
         Self::check_draw_pda_account(
@@ -634,7 +634,7 @@ impl Processor {
         )?;
         
         let equity_info = next_account_info(account_info_iter)?;
-        let equity = try_from_slice_unchecked::<LottoShare>(&equity_info.data.borrow())?;
+        let equity = try_from_slice_unchecked::<BondShare>(&equity_info.data.borrow())?;
         let equity_ata_info = next_account_info(account_info_iter)?;
         let equity_ata = Account::unpack_from_slice(&equity_ata_info.data.borrow())?;
         Self::check_draw_pda_account(
@@ -647,7 +647,7 @@ impl Processor {
         )?;
 
         let treasury_info = next_account_info(account_info_iter)?;
-        let treasury = try_from_slice_unchecked::<LottoShare>(&treasury_info.data.borrow())?;
+        let treasury = try_from_slice_unchecked::<BondShare>(&treasury_info.data.borrow())?;
         let treasury_ata_info = next_account_info(account_info_iter)?;
         let treasury_ata = Account::unpack_from_slice(&treasury_ata_info.data.borrow())?;
         Self::check_draw_pda_account(
@@ -660,7 +660,7 @@ impl Processor {
         )?;
 
         let jackpot_info = next_account_info(account_info_iter)?;
-        let jackpot = try_from_slice_unchecked::<LottoShare>(&jackpot_info.data.borrow())?;
+        let jackpot = try_from_slice_unchecked::<BondShare>(&jackpot_info.data.borrow())?;
         let jackpot_ata_info = next_account_info(account_info_iter)?;
         let jackpot_ata = Account::unpack_from_slice(&jackpot_ata_info.data.borrow())?;
         Self::check_draw_pda_account(
@@ -673,7 +673,7 @@ impl Processor {
         )?;
 
         let stake_info = next_account_info(account_info_iter)?;       
-        let stake = try_from_slice_unchecked::<LottoShare>(&stake_info.data.borrow())?; 
+        let stake = try_from_slice_unchecked::<BondShare>(&stake_info.data.borrow())?; 
         let stake_ata_info = next_account_info(account_info_iter)?;
         let stake_ata = Account::unpack_from_slice(&stake_ata_info.data.borrow())?;
         Self::check_draw_pda_account(
@@ -699,7 +699,7 @@ impl Processor {
             fee_ata_info,
             equity_ata_info,
             fee_info,
-            LottoSeed::Fee,
+            BondSeed::Fee,
             fee.bump,
             equity.share(amount),
         )?;
@@ -713,7 +713,7 @@ impl Processor {
             fee_ata_info,
             treasury_ata_info,
             fee_info,
-            LottoSeed::Fee,
+            BondSeed::Fee,
             fee.bump,
             treasury.share(amount),
         )?;
@@ -727,7 +727,7 @@ impl Processor {
             fee_ata_info,
             jackpot_ata_info,
             fee_info,
-            LottoSeed::Fee,
+            BondSeed::Fee,
             fee.bump,
             jackpot.share(amount),
         )?; 
@@ -741,7 +741,7 @@ impl Processor {
             fee_ata_info,
             stake_ata_info,
             fee_info,
-            LottoSeed::Fee,
+            BondSeed::Fee,
             fee.bump,
             stake.share(amount),
         )
@@ -758,17 +758,17 @@ impl Processor {
         let account_info_iter = &mut accounts.iter();
         let draw_authority_info = next_account_info(account_info_iter)?;
         let config_info = next_account_info(account_info_iter)?;
-        let config = try_from_slice_unchecked::<LottoConfig>(&config_info.data.borrow())?;
+        let config = try_from_slice_unchecked::<BondConfig>(&config_info.data.borrow())?;
         Self::check_draw_account(program_id, config_info, draw_authority_info, &config)?;
 
         let state_info = next_account_info(account_info_iter)?;
-        let mut state = try_from_slice_unchecked::<LottoState>(&state_info.data.borrow_mut())?;
+        let mut state = try_from_slice_unchecked::<BondState>(&state_info.data.borrow_mut())?;
         Check::owner(state_info, program_id)?;
         Check::valid(&state, state_info)?;
         Check::account(config_info, &state.authority)?;
         
         let jackpot_info = next_account_info(account_info_iter)?;
-        let jackpot = try_from_slice_unchecked::<LottoShare>(&jackpot_info.data.borrow())?;
+        let jackpot = try_from_slice_unchecked::<BondShare>(&jackpot_info.data.borrow())?;
         let jackpot_ata_info = next_account_info(account_info_iter)?;
         let jackpot_ata = Account::unpack_from_slice(&jackpot_ata_info.data.borrow())?;
         Self::check_draw_pda_account(
@@ -786,7 +786,7 @@ impl Processor {
         Check::pubkey(&receiver_ata.owner, receiver_info.key)?;
 
         let draw_info = next_account_info(account_info_iter)?;
-        let draw = try_from_slice_unchecked::<LottoDraw>(&draw_info.data.borrow())?;
+        let draw = try_from_slice_unchecked::<BondDraw>(&draw_info.data.borrow())?;
         Check::uninitialized(&draw, draw_info)?;
         Check::owner(draw_info, program_id)?;
 
@@ -808,7 +808,7 @@ impl Processor {
         let is_rollover = receiver_info.key.eq(jackpot_info.key);
         let rollover = if is_rollover { state.rollover + 1 } else { 0 };
 
-        LottoDraw::new(
+        BondDraw::new(
             draw_authority_info.key.clone(),
             id,
             amount,
@@ -837,7 +837,7 @@ impl Processor {
                 jackpot_ata_info,
                 receiver_ata_info,
                 jackpot_info,
-                LottoSeed::Jackpot,
+                BondSeed::Jackpot,
                 jackpot.bump,
                 amount,
             )?;

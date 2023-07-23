@@ -1,4 +1,4 @@
-//! A program for creating and managing stake pool lottos.
+//! A program for creating and managing premium bonds.
 
 
 // The deployed program id.
